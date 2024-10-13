@@ -6,9 +6,7 @@ import com.example.springrest.service.CloudVendorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -57,16 +55,6 @@ class CloudVendorServiceImplTest {
 
         when(cloudVendorRepository.save(cloudVendor)).thenReturn(cloudVendor);
         assertThat(cloudVendorService.updateCloudVendor(cloudVendor)).isEqualTo("Success");
-    }
-
-    @Test
-    void testDeleteCloudVendor() {
-        mock(CloudVendor.class);
-        mock(CloudVendorRepository.class, Mockito.CALLS_REAL_METHODS);
-
-        doAnswer(Answers.CALLS_REAL_METHODS).when(cloudVendorRepository)
-                .deleteById(any());
-        assertThat(cloudVendorService.deleteCloudVendor("1")).isEqualTo("Success");
     }
 
     @Test

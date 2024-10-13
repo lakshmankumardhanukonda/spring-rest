@@ -1,101 +1,88 @@
 package com.example.springrest.controller;
 
+
+import static io.restassured.RestAssured.*;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.example.springrest.model.CloudVendor;
-import com.example.springrest.service.CloudVendorService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
-@WebMvcTest(CloudVendorController.class)
 class CloudVendorControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private CloudVendorService cloudVendorService;
-    CloudVendor cloudVendorOne;
-    CloudVendor cloudVendorTwo;
-    List<CloudVendor> cloudVendorList= new ArrayList<>();
+    private String baseUrl = "http://localhost:8080/cloudvendor/";
 
-    @BeforeEach
-    void setUp() {
-        cloudVendorOne = new CloudVendor("1", "Amazon",
-                "USA", "xxxxx");
-        cloudVendorTwo = new CloudVendor("2", "GCP",
-                "UK", "yyyyy");
-        cloudVendorList.add(cloudVendorOne);
-        cloudVendorList.add(cloudVendorTwo);
-    }
-
-    @AfterEach
-    void tearDown() {
+    @Test
+    public void getCloudVendorDetailsTest() {
+        String vendorTd = "1";
+        given().get(baseUrl + vendorTd)
+                .then()
+                .statusCode(200)
+                .log().all();
     }
 
     @Test
-    void getCloudVendorDetails() throws Exception {
-        when(cloudVendorService.getCloudVendor("1")).thenReturn(cloudVendorOne);
-        this.mockMvc.perform(get("/cloudvendor/" + "1")).andDo(print()).andExpect(status().isOk());
+    public void getAllCloudVendorDetailsTest() {
+        given().get(baseUrl)
+                .then()
+                .statusCode(200)
+                .log().all();
     }
 
     @Test
-    void getAllCloudVendorDetails() throws  Exception {
-        when(cloudVendorService.getAllCloudVendors()).thenReturn(cloudVendorList);
-        this.mockMvc.perform(get("/cloudvendor"))
-                .andDo(print()).andExpect(status().isOk());
+    public void createCloudVendorDetailsTest() throws JsonProcessingException {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("vendorId", "2");
+        requestBody.put("vendorName", "Google");
+        requestBody.put("vendorAddress", "Banglore");
+        requestBody.put("vendorPhoneNumber", "234567");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBodyAsString = objectMapper.writeValueAsString(requestBody);
+
+        given()
+                .header("Content-Type", "application/json")
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(requestBodyAsString)
+                .post(baseUrl)
+                .then()
+                .statusCode(200)
+                .log().all();
     }
 
     @Test
-    void createCloudVendorDetails() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        String requestJson=ow.writeValueAsString(cloudVendorOne);
+    public void updateCloudVendorDetailsTest() throws JsonProcessingException {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("vendorId", "2");
+        requestBody.put("vendorName", "Google");
+        requestBody.put("vendorAddress", "Banglore");
+        requestBody.put("vendorPhoneNumber", "234568");
 
-        when(cloudVendorService.createCloudVendor(cloudVendorOne)).thenReturn("Success");
-        this.mockMvc.perform(post("/cloudvendor")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andDo(print()).andExpect(status().isOk());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBodyAsString = objectMapper.writeValueAsString(requestBody);
+
+        given()
+                .header("Content-Type", "application/json")
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(requestBodyAsString)
+                .put(baseUrl)
+                .then()
+                .statusCode(200)
+                .log().all();
     }
 
     @Test
-    void updateCloudVendorDetails() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-        String requestJson=ow.writeValueAsString(cloudVendorOne);
-
-        when(cloudVendorService.updateCloudVendor(cloudVendorOne))
-                .thenReturn("Cloud Vendor Updated Successfully");
-        this.mockMvc.perform(put("/cloudvendor")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andDo(print()).andExpect(status().isOk());
-    }
-
-    @Test
-    void deleteCloudVendorDetails() throws Exception {
-        when(cloudVendorService.deleteCloudVendor("1"))
-                .thenReturn("Cloud Vendor Deleted Successfully");
-        this.mockMvc.perform(delete("/cloudvendor/" + "1"))
-                .andDo(print()).andExpect(status().isOk());
-
+    public void deleteCloudVendorDetailsTest() {
+        String vendorId = "2";
+        given()
+                .delete(baseUrl + vendorId)
+                .then()
+                .statusCode(200)
+                .log().all();
     }
 }
