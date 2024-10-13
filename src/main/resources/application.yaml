@@ -1,0 +1,9 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, beans, metrics"
+      base-path: "/management-dashboard"
+  endpoint:
+    health:
+      show-details: always
